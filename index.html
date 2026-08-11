@@ -654,9 +654,13 @@ function startQuiz() {
   loadQuestion();
 
   // 3. Subukan i-unlock ang audio sa background
-  const player = document.getElementById("audioPlayer");
-  player.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-  player.play().catch(e => console.log("Audio waiting for interaction..."));
+  function startQuiz() {
+  // Hide start screen
+  document.getElementById("startScreen").style.display = "none";
+
+  // Load Question 1
+  loadQuestion();
+}
 }
 </script>
 

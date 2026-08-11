@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eps-ubt-v9'; // Tumaas ang version
+const CACHE_NAME = 'eps-ubt-v6'; // Tumaas ang version
 const ASSETS = [
   './',
   'index.html', // Tinanggal ang ./ para mas safe sa GitHub

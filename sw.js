@@ -1,71 +1,66 @@
-const CACHE_NAME = 'eps-ubt-v5'; // Tumaas ang version
+const CACHE_NAME = "dalbit-ubt-v6";
+
 const ASSETS = [
-  './',
-  'index.html', // Tinanggal ang ./ para mas safe sa GitHub
-  'manifest.json',
-  './',
-  './index.html',
-  './styles.css',
-  './script.js',
-  './manifest.json',
-  './audio/q21.mp3',
-  './audio/q22.mp3',
-  './audio/q23.mp3',
-  './audio/q24.mp3',
-  './audio/q25.mp3',
-  './audio/q26.mp3',
-  './audio/q27.mp3',
-  './audio/q28.mp3',
-  './audio/q29.mp3',
-  './audio/q30.mp3',
-  './audio/q31.mp3',
-  './audio/q32.mp3',
-  './audio/q33.mp3',
-  './audio/q34.mp3',
-  './audio/q35.mp3',
-  './audio/q36.mp3',
-  './audio/q37.mp3',
-  './audio/q38.mp3',
-  './audio/q39.mp3',
-  './audio/q40.mp3',
-  'https://cdn-icons-png.flaticon.com/512/3062/3062634.png'
+  "./",
+  "./index.html",
+  "./manifest.json"
 ];
 
-// Install Service Worker
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching assets...');
-      // Ginawang map para ma-detect kung anong specific na file ang nag-error
-      return Promise.all(
-        ASSETS.map(url => {
-          return cache.add(url).catch(err => console.error(`Failed to cache: ${url}`, err));
-        })
-      );
+// INSTALL
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS);
     })
   );
+
+  self.skipWaiting();
 });
 
-// Fetch Assets
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((res) => {
-      // Kung audio ang request, mas safe na hayaan muna ang network kung may issue ang cache
-      if (e.request.url.includes('.mp3')) {
-        return res || fetch(e.request);
+// FETCH
+self.addEventListener("fetch", event => {
+
+  const request = event.request;
+  const url = new URL(request.url);
+
+  /*
+   * IMPORTANT:
+   * NEVER intercept MP3 files.
+   * Let GitHub Pages serve audio directly.
+   */
+  if (
+    request.destination === "audio" ||
+    url.pathname.toLowerCase().endsWith(".mp3")
+  ) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then(cachedResponse => {
+
+      if (cachedResponse) {
+        return cachedResponse;
       }
-      return res || fetch(e.request);
+
+      return fetch(request);
     })
   );
 });
 
-// Activate - Clean up old caches
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
+// ACTIVATE
+self.addEventListener("activate", event => {
+
+  event.waitUntil(
+    caches.keys().then(keys => {
+
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       );
+
     })
   );
+
+  self.clients.claim();
 });
